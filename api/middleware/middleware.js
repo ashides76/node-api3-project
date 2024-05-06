@@ -1,3 +1,6 @@
+const express = require('express')
+const morgan = require('morgan')
+
 function logger(req, res, next) {
   // DO YOUR MAGIC
 }
