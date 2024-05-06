@@ -1,11 +1,13 @@
 const express = require('express');
 const userRouter = require('./users/users-router')
+const { logger } = require('./middleware/middleware')
 const morgan = require('morgan')
 
 const server = express();
 
 // remember express by default cannot parse JSON in request bodies
 server.use(express.json())
+server.use(logger)
 server.use('/api/users', userRouter)
 server.use(morgan('dev'))
 
