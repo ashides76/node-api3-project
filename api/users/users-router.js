@@ -1,5 +1,5 @@
 const express = require('express');
-const {validateUserId} = require('../middleware/middleware')
+const {validateUserId, validateUser, validatePost} = require('../middleware/middleware')
 
 // You will need `users-model.js` and `posts-model.js` both
 const Users = require('./users-model')
@@ -13,7 +13,6 @@ router.get('/', (req, res) => {
   // RETURN AN ARRAY WITH ALL THE USERS
   Users.get()
     .then(users => {
-      console.log(users)
       res.status(200).json(users)
     })
     .catch(err => {
@@ -25,35 +24,40 @@ router.get('/', (req, res) => {
 
 });
 
-router.get('/:id', validateUserId, async (req, res, next) => {
-  // RETURN THE USER OBJECT
-  console.log(req.user)
-  await res.json(req.user)
-  // this needs a middleware to verify user id
+//how do I include catch?***
+router.get('/:id', validateUserId, async (req, res) => {
+    await res.json(req.user)
 });
 
-router.post('/', (req, res) => {
-  // RETURN THE NEWLY CREATED USER OBJECT
-  // this needs a middleware to check that the request body is valid
+router.post('/', validateUser, async (req, res, next) => {
+  const { name } = req.body
+  await Users.insert({name: name})
+    .then(newUser => {
+      res.status(201).json(newUser)
+    })
+    .catch(err => {
+      next(err)
+    })
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validateUserId, validateUser, (req, res) => {
   // RETURN THE FRESHLY UPDATED USER OBJECT
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateUserId, (req, res) => {
   // RETURN THE FRESHLY DELETED USER OBJECT
   // this needs a middleware to verify user id
 });
 
-router.get('/:id/posts', (req, res) => {
+router.get('/:id/posts', validateUserId, async (req, res) => {
   // RETURN THE ARRAY OF USER POSTS
+  await res.json(req.post)
   // this needs a middleware to verify user id
 });
 
-router.post('/:id/posts', (req, res) => {
+router.post('/:id/posts', validateUserId, (req, res) => {
   // RETURN THE NEWLY CREATED USER POST
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid

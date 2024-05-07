@@ -1,6 +1,5 @@
-const express = require('express')
-const morgan = require('morgan')
 const Users = require('../users/users-model')
+const Posts = require('../posts/posts-model')
 
 function logger(req, res, next) {
   // DO YOUR MAGIC
@@ -13,11 +12,13 @@ function logger(req, res, next) {
 
 async function validateUserId (req, res, next) {
   // DO YOUR MAGIC
-  const { id } = req.param
+  const { id } = req.params
   await Users.getById(id)
     .then(user => {
       if (user) {
+        console.log(user)
         req.user = user
+        console.log(req.user)
         next()
       } else {
         next({
@@ -26,18 +27,44 @@ async function validateUserId (req, res, next) {
         })
       }
     })
+    .catch(err => {
+      next(err)
+    })
+
 }
 
-function validateUser(req, res, next) {
+async function validateUser(req, res, next) {
   // DO YOUR MAGIC
+  const { name } = req.body
+  // why not required for post?
+  // await Users.getUserPosts(name) 
+      if (!name || !name.trim()) {
+        res.status(400).json({
+          message: "missing required name field"
+        })
+      } else {
+        next()
+      }
 }
 
 function validatePost(req, res, next) {
   // DO YOUR MAGIC
+  const { text } = req.body
+  // why not required for post?
+  // await Users.getUserPosts(name) 
+      if (text !== 'undefined' && typeof text === 'string' && text.trim().length) {
+        next()
+      } else {
+        next({
+          status: 400,
+          message: "missing required text field"
+        })
+      }
 }
 
 // do not forget to expose these functions to other modules
 module.exports = {
   logger,
-  validateUserId
+  validateUserId,
+  validateUser
 }
