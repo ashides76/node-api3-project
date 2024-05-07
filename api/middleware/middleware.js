@@ -16,9 +16,7 @@ async function validateUserId (req, res, next) {
   await Users.getById(id)
     .then(user => {
       if (user) {
-        console.log(user)
         req.user = user
-        console.log(req.user)
         next()
       } else {
         next({
@@ -43,6 +41,7 @@ async function validateUser(req, res, next) {
           message: "missing required name field"
         })
       } else {
+        req.name = name.trim()
         next()
       }
 }
@@ -52,19 +51,20 @@ function validatePost(req, res, next) {
   const { text } = req.body
   // why not required for post?
   // await Users.getUserPosts(name) 
-      if (text !== 'undefined' && typeof text === 'string' && text.trim().length) {
-        next()
-      } else {
-        next({
-          status: 400,
-          message: "missing required text field"
-        })
-      }
+  if (!text || !text.trim()) {
+    res.status(400).json({
+      message: "missing required text field"
+    })
+  } else {
+    req.text = text.trim()
+    next()
+  }
 }
 
 // do not forget to expose these functions to other modules
 module.exports = {
   logger,
   validateUserId,
-  validateUser
+  validateUser, 
+  validatePost,
 }
